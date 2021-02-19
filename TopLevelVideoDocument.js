@@ -35,7 +35,7 @@
    });
    observer.observe(document.documentElement, {
      childList: true,
-     subtree: true
+     subtree: true,
    });
  
    // Handle fullscreen mode
@@ -59,10 +59,10 @@
        ev.preventDefault();
        ev.stopPropagation();
  
-       if (!document.mozFullScreenElement) {
-         videoElement.mozRequestFullScreen();
+       if (!document.fullscreenElement) {
+         videoElement.requestFullscreen();
        } else {
-         document.mozCancelFullScreen();
+         document.exitFullscreen();
        }
      }
    });
