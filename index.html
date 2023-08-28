@@ -1,40 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
-    <link rel="stylesheet" href="TopLevelVideoDocument.css">
-    <script type="text/javascript" src="TopLevelVideoDocument.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <title>HLS</title>
+    <meta name="description" content="A simple HLS.js implementation">
+
+    <link rel="stylesheet" href="TopLevelVideoDocument.css">
+
+    <script src="hls.min.js"></script>
 </head>
-
 <body>
-    <video id="video" controls autoplay></video>
-</body>
+    <video id="video" autoplay controls></video>
 
-<script>
-    var url = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
-
-    var video = document.getElementById("video");
-
-    if (Hls.isSupported()) {
+    <script type="text/javascript" src="TopLevelVideoDocument.js"></script>
+    <script>
         var hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            video.play();
-        });
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = url;
-        video.addEventListener("loadedmetadata", function () {
-            video.play();
-        });
-    }
-</script>
 
+        hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+            console.log('video and hls.js are now bound together !');
+        });
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+            console.log('manifest loaded, found ' + data.levels.length + ' quality level');
+        });
+        hls.on(Hls.Events.ERROR, function (event, data) {
+            if (data.fatal) {
+                switch (data.type) {
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        console.log('fatal media error encountered, try to recover');
+                        hls.recoverMediaError();
+                        break;
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        console.error('fatal network error encountered', data);
+                        break;
+                    default:
+                        hls.destroy();
+                        break;
+                }
+            }
+        });
+
+        var video = document.getElementById('video');
+        hls.attachMedia(video);
+
+        hls.loadSource('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8');
+
+        video.play();
+    </script>
+</body>
 </html>
